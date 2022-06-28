@@ -1,25 +1,48 @@
 const { Schema, model } = require('mongoose');
+const dateFormat = require('../utils/dateFormat');
 
-const PizzaSchema = new Schema ({
-    pizzaName: {
-        type: String
+const PizzaSchema = new Schema (
+    {
+        pizzaName: {
+            type: String
+        },
+
+        createdBy: {
+            type: String
+        },
+
+        createdAt: {
+            type: Date,
+            default: Date.now,
+            get: (createdAtValue) => dateFormat(createdAtValue)
+        },
+
+        size: {
+            type: String,
+            default: 'Large'
+        },
+
+        toppings: [],
+
+        comments: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'Comment'
+            }
+        ]
     },
+    {
+        toJSON: {
+            virtuals: true,
+            getters: true
+        },
+        id: false
+    }
+);
 
-    createdBy: {
-        type: String
-    },
-
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-
-    size: {
-        type: String,
-        default: 'Large'
-    },
-
-    toppings: []
+//get total count of comments and replies on retrieval. This is considered Virtuals
+PizzaSchema.virtual('commentCount').get(function() {
+    return this.comments.length;
 });
 
 //create the pizza model using the PizzaSchema
